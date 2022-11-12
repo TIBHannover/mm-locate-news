@@ -16,7 +16,7 @@ args = parser.parse_args()
 
 checkpoint_name = args.check_point.split('/')[-1]
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# device = torch.device('cpu')
+
 
 def get_eval(topk):
 
@@ -118,28 +118,6 @@ def gcd( L1, L2) : # L1: lat, lng
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
     return 6371 * ( acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2)))
-
-
-def d_range(inp_range, val):
-    if val < 25:
-        inp_range[25] +=1
-    elif 25<= val < 200:
-        inp_range[200] +=1
-    elif 200 <= val < 750:
-        inp_range[750] +=1
-    elif 200 <= val < 2500:
-        inp_range[2500] +=1
-    elif 2500 <= val < 3000:
-        inp_range[3000] +=1
-    elif 3000 <= val < 4000:
-        inp_range[4000] +=1
-    elif 4000 <= val < 5000:
-        inp_range[5000] +=1
-    elif 5000 <= val < 10000:
-        inp_range[10000] +=1
-    elif 10000 <= val < 20000:
-        inp_range[20000] +=1
-    return inp_range
 
 
 if args.model_name == 'reg_v_clip':
