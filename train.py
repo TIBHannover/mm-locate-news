@@ -51,10 +51,7 @@ def main():
     model ={'v_clip':geo_base_v(), 'v_loc':geo_base_v(), 'v_scene':geo_base_v(), 'v_obj':geo_base_v(), 'v_loc_obj':geo_base_v(),'v_clip_loc':geo_base_v(), 'v_clip_scene':geo_base_v(), 'v_loc_scene':geo_base_v(), 'v_loc_scene_obj':geo_base_v() , 'v_clip_loc_scene':geo_base_v(),
             't_body':geo_base_t(), 't_entity':geo_base_t() ,'t_2bert':geo_base_t(),
             'm_body_clip':geo_base_vt(), 'm_entity_clip':geo_base_vt(), 'm_2bert_clip':geo_base_vt(),'m_2bert_clip_scene':geo_base_vt(), 'm_2bert_clip_loc':geo_base_vt() ,  'm_2bert_loc_scene':geo_base_vt(), 'm_2bert_clip_loc_scene':geo_base_vt(),
-            # 'reg_v_clip':geo_base_v(), 'reg_v_scene':geo_base_v(), 'reg_v_clip_loc_scene':geo_base_v(),
-            # 'reg_t': geo_base_t(),
-            # 'reg_mm_clip':geo_base_vt(), 'reg_mm_loc_scene':geo_base_vt(), 'reg_mm_body_clip':geo_base_vt(), 'reg_mm_entity_clip':geo_base_vt(), 'reg_mm_clip_loc_scene':geo_base_vt()
-    }[args.model_name]
+           }[args.model_name]
 
     
     criterion = Loss()
