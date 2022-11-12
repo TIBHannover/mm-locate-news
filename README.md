@@ -13,7 +13,9 @@ pip install -r requirements.txt
 Download the data from here and put in the root directory.
 
 ## Download Checkpoints
-Download the trained models from here and extract in ``` experiments/snapshots```.
+For mm-locate-news dataset download the trained models from here and extract in ``` experiments/snapshots```.
+For BreakingNews dataset download the trained models from here and extract in ``` breakingnews/experiments/snapshots```.
+
 
 ## Evaluation
 To evaluate the models based on mm-locate-news data: 
@@ -39,7 +41,7 @@ python ISN/evaluate_ISN.py
 ```
 
 ## Training 
-To train the models based on mm-locate-news data:
+To train the models based on mm-locate-news dataset:
 ```bash
 python train.py \
 --model_name <MODELNAME> \
@@ -49,7 +51,7 @@ python train.py \
 --freeze_text <[True, False]>
 ```
 
-To train the models based on BreakingNews data:
+To train the models based on BreakingNews dataset:
 ```bash
 python breakingnews/bn_train.py \
 --model_name <MODELNAME> \
