@@ -38,17 +38,18 @@ python Mordecai/evaluate_ISN.py
 ## Training 
 To train the models based on mm-locate-news data:
 ```bash
-python train.py --model_name <MODELNAME> --test_check_point <CHECKPOINT>
+python train.py \
+--model_name <MODELNAME> \
+--resume <CHECKPOINT> \
+--tensorboard <[True, False]> \
+--freeze_image <[True, False]> \
+--freeze_text <[True, False]>
 ```
 
 To train the models based on BreakingNews data:
 ```bash
 python breakingnews/bn_train.py \
 --model_name <MODELNAME> \
---test_check_point <CHECKPOINT> \
---resume <CHECKPOINT> \
---tensorboard <[True, False]> \
---freeze_image <[True, False]> \
---freeze_text <[True, False]>
+--resume <CHECKPOINT> 
 ```
 
