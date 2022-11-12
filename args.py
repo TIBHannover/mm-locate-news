@@ -22,7 +22,7 @@ def get_parser():
     parser.add_argument('--emb_dim', default=1024, type=int)
     parser.add_argument('--n_classes', default=389, type=int)
     parser.add_argument('--dropout', default=0.1, type=float)
-    parser.add_argument('--test_check_point', default='208.pth.tar', type=str)
+    parser.add_argument('--test_check_point', default='-', type=str)
 
     parser.add_argument('--batch_size', default=128, type=int)
     parser.add_argument('--lr', default=0.0001, type=float)
