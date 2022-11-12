@@ -1,0 +1,169 @@
+
+from pathlib import Path
+import os
+ROOT_PATH = Path(os.path.dirname(__file__))
+import sys
+sys.path.insert(1, f'{ROOT_PATH.parent}/' )
+from bn_data_loader import Data_Loader_BN
+from bn_args import get_parser
+import time
+import logging
+from utils import *
+from models.m_t import Geo_base as geo_base_t
+from models.m_v import Geo_base as geo_base_v
+from models.m_vt import Geo_base as geo_base_vt
+import numpy as np
+import random
+from torch.utils.tensorboard import SummaryWriter
+
+# read parser
+parser = get_parser()
+args = parser.parse_args()
+
+# create directories for train experiments
+logging_path = f'{ROOT_PATH}/{args.path_results}'
+checkpoint_path = f'{ROOT_PATH}/{args.snapshots}/{args.model_name}'
+Path(logging_path).mkdir(parents=True, exist_ok=True)
+Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
+    
+# set logger
+logging.basicConfig(format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%d/%m/%Y %I:%M:%S %p',
+                    level=logging.INFO,
+                    handlers=[
+                        logging.FileHandler(f'{logging_path}/train{args.model_name}.log', 'w'),
+                        logging.StreamHandler()
+                    ])
+logger = logging.getLogger(__name__)
+
+# set a seed value
+random.seed(args.seed)
+np.random.seed(args.seed)
+if torch.cuda.is_available():
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
+
+# set device
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def main():
+    # set model
+    model = {'reg_v_clip':geo_base_v(), 'reg_t_2bert':geo_base_t(), 'reg_mm_clip_loc_scene':geo_base_vt()
+    }[args.model_name]
+
+    criterion = Reg_Loss()
+
+    model.to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+
+    # load checkpoint
+    resume_path = args.resume
+    if os.path.isfile(resume_path):
+        logger.info(f"=> loading checkpoint '{args.resume}''")
+        checkpoint = torch.load(resume_path)
+        args.start_epoch = int( checkpoint['epoch'])
+        model.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        logger.info(f"=> loaded checkpoint '{args.resume}' (epoch {checkpoint['epoch']})")
+
+    if args.freeze_text:
+        for p in model.learn_text.parameters():
+            p.requires_grad = False
+    if args.freeze_image:
+        for p in model.learn_image.parameters():
+            p.requires_grad = False
+
+    # log num of params
+    logger.info(f'The model has {sum(p.numel() for p in model.parameters() if p.requires_grad):,} trainable parameters')
+
+    
+    # prepare training loader
+    data_loader_train = Data_Loader_BN(data_path=f'{args.data_path}/{args.data_to_use}', partition='train')
+    train_loader = torch.utils.data.DataLoader( data_loader_train,  batch_size=args.batch_size, shuffle=True,num_workers=args.workers, pin_memory=False)
+    logger.info('Training loader prepared.')
+
+    # prepare validation loader
+    data_loader_val = Data_Loader_BN(data_path=f'{args.data_path}/{args.data_to_use}', partition='val')  
+    val_loader = torch.utils.data.DataLoader( data_loader_val,  batch_size=args.batch_size,  shuffle=False, num_workers=args.workers, pin_memory=False)
+    logger.info('Validation loader prepared.')
+
+    # train 
+    for epoch in range(args.start_epoch, args.epochs):
+        train_result, batch_time = train(train_loader, model, criterion, optimizer, epoch)
+
+        val_result = validate(val_loader, model, criterion)
+        
+        # show tensorboard
+        if args.tensorboard == True:
+            writer.add_scalars(f"{args.model_name}/ {args.data_to_use} / Loss ",{ 'TRAIN': train_result['loss'].data,
+                                                                                    'VAL': val_result['loss'].data}, epoch)        
+        # save checkpoints
+        save_checkpoint({
+                    'data': args.data_path.split('/')[-1],
+                    'epoch': f'epoch_{epoch + 1}_tim.{batch_time.sum:0.2f}_loss_{np.round(val_result["loss"].item(), 3)}',
+                    'state_dict': model.state_dict(),
+                    'optimizer': optimizer.state_dict()},
+                    path=f'{checkpoint_path}')
+
+        logger.info(f'Validation loss: {val_result}')
+
+
+
+def train(train_loader, model, criterion, optimizer, epoch):
+    batch_time = AverageMeter()
+    losses =  AverageMeter()
+
+    # switch to train mode
+    model.train()
+
+    end = time.time()
+    for i, batch in enumerate(train_loader):
+
+        output = model(batch)
+
+        # compute loss
+        loss = criterion(output, batch)
+
+        # compute gradient and do Adam step
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 5)
+        optimizer.zero_grad()
+        losses.update(loss.data, args.batch_size)
+        log_loss = f'Loss: {losses.val} ({losses.avg})'
+        loss.backward()
+        optimizer.step()
+
+        # track time
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        logger.info(f'Epoch: {epoch+1} - {log_loss} - Batch: {((i+1)/len(train_loader))*100:.2f}% - Time: {batch_time.sum:0.2f}s')
+    
+    results = {  'loss': losses.avg }
+
+    return results, batch_time
+    
+
+def validate(val_loader, model, criterion):
+    losses = AverageMeter()
+
+    # switch to evaluate mode
+    model.eval()
+
+    for i, batch in enumerate(val_loader):
+        
+        output = model(batch)
+
+        loss = criterion(output, batch)
+
+        losses.update(loss.data, args.batch_size)
+
+    results = {  'loss': losses.avg }
+
+    return results
+
+
+if __name__ == '__main__':
+    if args.tensorboard == True:
+        writer = SummaryWriter()
+    main()
