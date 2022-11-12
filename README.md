@@ -17,6 +17,20 @@ To evaluate the models based on mm-locate-news data:
 ```bash
 python evaluate.py --model_name <MODELNAME> --test_check_point <CHECKPOINT>
 ```
+To evaluate the models based on Breakingnews data: 
+```bash
+python breakingnews/bn_evaluate.py --model_name <MODELNAME> --test_check_point <CHECKPOINT>
+```
+To evaluate Cliff-clavin: 
+```bash
+python Cliff-clavin/evaluate_cliff.py
+```
+
+To evaluate Mordecai: 
+```bash
+python Mordecai/evaluate_mordecai.py
+```
+
 
 ## Training
 
