@@ -32,7 +32,7 @@ python Mordecai/evaluate_mordecai.py
 ```
 To evaluate ISN: 
 ```bash
-python Mordecai/evaluate_ISN.py
+python ISN/evaluate_ISN.py
 ```
 
 ## Training 
