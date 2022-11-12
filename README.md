@@ -30,7 +30,7 @@ To evaluate Mordecai:
 ```bash
 python Mordecai/evaluate_mordecai.py
 ```
-To ISN: 
+To evaluate ISN: 
 ```bash
 python Mordecai/evaluate_ISN.py
 ```
