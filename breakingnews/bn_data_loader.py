@@ -38,8 +38,6 @@ class Data_Loader_BN(data.Dataset):
             coords = coords[0]
         cls = grp['class'][()]
 
-        if instanceId == '224050477':
-            entity = body
 
         return {
             'id': instanceId,
