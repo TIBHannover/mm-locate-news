@@ -65,10 +65,10 @@ def get_eval(topk):
 class Data_Loader_BN(data.Dataset):
     def __init__(self):
         
-        self.h5f = h5py.File(args.h5_path, 'r')
+        self.h5f = h5py.File(f'{args.data_path}/{args.data_to_use}/test.h5', 'r')
 
         self.ids = [str(id) for id in self.h5f]
-        self.h5f_info = h5py.File(f'/data/1/datasets/breaking_news/h5_splits/mufl/test/textual.h5', 'r')
+        # self.h5f_info = h5py.File(f'/data/1/datasets/breaking_news/h5_splits/mufl/test/textual.h5', 'r')
 
     def __getitem__(self, index):
         instanceId = self.ids[index]
@@ -168,13 +168,11 @@ test_loader = torch.utils.data.DataLoader(
                 pin_memory=False)
 
 ls_gcds = []    
-rg = {25:0, 200:0, 750:0, 2500:0, 3000:0, 5000:0, 4000:0, 10000:0, 20000:0}
 
 for i_counter, batch in enumerate(test_loader):
 
-    print(i_counter + 1, int(10581/len(batch['clip'])), 'batches done! | ', rg)
+    print(i_counter + 1, int(10581/len(batch['clip'])), 'batches done!')
     output = model( batch )
-    
 
     for i_s, id in enumerate( batch['id']):
         
@@ -192,20 +190,16 @@ for i_counter, batch in enumerate(test_loader):
             if d < min_d:
                 min_d = d
                 d = inf
-            # if d > 10000:
-            #     print
 
         ls_gcds.append(min_d)
-        rg = d_range(rg, min_d)
 
-mean_gcd = np.mean(ls_gcds)
-median_gcd = np.median(ls_gcds)
+mean_gcd = np.round( np.mean(ls_gcds) / 1000, 2 )
+median_gcd = np.round( np.median(ls_gcds) / 1000, 2)
 
-print('#samples', len(ls_gcds),'MEAN:', mean_gcd/1000, ' | MEDIAN:', median_gcd/1000)
+print('#samples', len(ls_gcds),'MEAN:', mean_gcd, ' | MEDIAN:', median_gcd)
     
 results_path = f'{args.results_path}/eval_{args.model_name}_{checkpoint_name}.json'
     
 with open(results_path, 'w') as outfile:
-    json.dump({'#samples': len(ls_gcds), 'Mean': mean_gcd/1000, 'Median': median_gcd/1000}, outfile)
+    json.dump({'#samples': len(ls_gcds), 'Mean': mean_gcd, 'Median': median_gcd}, outfile)
 
-print(rg)
