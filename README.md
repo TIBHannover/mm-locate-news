@@ -12,6 +12,10 @@ pip install -r requirements.txt
 ## Download Data
 Download the data from here and put in the root directory.
 
+## Download Checkpoints
+For mm-locate-news download the trained models from here and extract in ``` experiments/snapshots```.
+For Breakingnews download the trained models from here and extract in ``` breakingnews/experiments/snapshots```.
+
 ## Evaluation
 To evaluate the models based on mm-locate-news data: 
 ```bash
