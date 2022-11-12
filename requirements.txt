@@ -4,3 +4,4 @@ tqdm == 4.50
 h5py == 3.7.0
 tensorboard == 2.10.1
 scikit-learn
+git+https://github.com/openai/CLIP.git
