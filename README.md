@@ -1,4 +1,4 @@
-### MM-Locate-News: Multimodal Focus Location Estimation in News
+## MM-Locate-News: Multimodal Focus Location Estimation in News
 
 ## Installation
 
