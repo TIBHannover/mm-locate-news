@@ -46,7 +46,6 @@ To train the models based on mm-locate-news dataset:
 python train.py \
 --model_name <MODELNAME> \
 --resume <CHECKPOINT> \
---tensorboard <[True, False]> \
 --freeze_image <[True, False]> \
 --freeze_text <[True, False]>
 ```
