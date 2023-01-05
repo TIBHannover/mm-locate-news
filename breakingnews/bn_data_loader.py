@@ -1,19 +1,16 @@
 import torch.utils.data as data
 import h5py
-from bn_args import get_parser
-parser = get_parser()
-args = parser.parse_args()
+
 
 class Data_Loader_BN(data.Dataset):
     def __init__(self, data_path, partition):
 
-        if data_path == None:
-            raise Exception('No data path specified.')
+        if data_path == None:  raise Exception('No data path specified.')
 
         self.partition = partition
         
         self.h5f = h5py.File(f'{data_path}/{partition}.h5', 'r')
-        self.h5f_info = h5py.File(f'{data_path}/{partition}_textual.h5', 'r')
+        self.h5f_info = h5py.File(f'{data_path}/{partition}_info.h5', 'r')
         self.ids = [str(id) for id in self.h5f]
         
 
