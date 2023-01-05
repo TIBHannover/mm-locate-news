@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(1, '..') 
+from bn_args import get_parser
 import torch
 import numpy as np
 import h5py
@@ -6,10 +9,10 @@ from models.m_t import Geo_base as geo_base_t
 from models.m_v import Geo_base as geo_base_v
 from models.m_vt import Geo_base as geo_base_vt
 from cmath import inf
-import sys
-sys.path.insert(1, '/data/1/mm-locate-news') 
 from utils import *
-from breakingnews.bn_args import get_parser
+from pathlib import Path
+import os
+ROOT_PATH = Path(os.path.dirname(__file__))
 
 parser = get_parser()
 args = parser.parse_args()
@@ -47,7 +50,7 @@ def get_eval(topk):
                     
                 if d < min_d:
                     min_d = d
-                    d=inf
+                    d = inf
 
         ls_gcds.append(min_d)
 
@@ -65,17 +68,13 @@ def get_eval(topk):
 class Data_Loader_BN(data.Dataset):
     def __init__(self):
         
-        self.h5f = h5py.File(f'{args.data_path}/{args.data_to_use}/test.h5', 'r')
+        self.h5f = h5py.File(f'{ROOT_PATH}/../{args.data_path}/{args.data_to_use}/test.h5', 'r')
 
         self.ids = [str(id) for id in self.h5f]
-        # self.h5f_info = h5py.File(f'/data/1/datasets/breaking_news/h5_splits/mufl/test/textual.h5', 'r')
 
     def __getitem__(self, index):
         instanceId = self.ids[index]
-
-
         grp = self.h5f[instanceId]
-
         clip = grp['clip'][()]
         vloc = grp['loc'][()]
         obj = grp['obj'][()]
@@ -84,17 +83,11 @@ class Data_Loader_BN(data.Dataset):
         entity = grp['entity'][()]
         loc = grp['class'][()][0]
 
-        if len(loc.shape) == 1:
-            loc = np.array([loc])
-
-        d = 50 - loc.shape[0]
+        if len(loc.shape) == 1: loc = np.array([loc])
         
-        for _ in range(d):
-            t = np.array([[inf, inf]])
-            loc = np.append(loc, t, 0)
+        for _ in range(50 - loc.shape[0]): loc = np.append(loc, np.array([[inf, inf]]), 0)
 
-        if len(entity) == 0:
-            entity = body
+        if len(entity) == 0: entity = body
 
         return {
             'id': instanceId,
@@ -111,7 +104,8 @@ class Data_Loader_BN(data.Dataset):
     def __len__(self):
         return len(self.ids)
 
-def gcd( L1, L2) : # L1: lat, lng
+
+def gcd( L1, L2) : #  lat, lng
     lat1, lon1 = (L1[0], L1[1])
     lat2, lon2 = (L2[0], L2[1])
 
@@ -120,20 +114,13 @@ def gcd( L1, L2) : # L1: lat, lng
     return 6371 * ( acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2)))
 
 
-if args.model_name == 'reg_v_clip':
-    model = geo_base_v()
-elif args.model_name == 'reg_t_2bert':
-    model = geo_base_t()
-elif args.model_name == 'reg_mm_clip_loc_scene':
-    model = geo_base_vt()
+if args.model_name == 'reg_v_clip':  model = geo_base_v()
+elif args.model_name == 'reg_t_2bert':  model = geo_base_t()
+elif args.model_name == 'reg_mm_clip_loc_scene':  model = geo_base_vt()
 
 model.to(device)
 
-
-if device.type == 'cpu':
-    checkpoint = torch.load(args.check_point, encoding='latin1', map_location='cpu')
-else:
-    checkpoint = torch.load(args.check_point, encoding='latin1')
+checkpoint = torch.load(f'{ROOT_PATH}/{args.snapshots}/{args.model_name}/{args.check_point}', encoding='latin1', map_location=device)
 
 model.load_state_dict(checkpoint['state_dict'])
 model.eval()
@@ -149,7 +136,7 @@ ls_gcds = []
 
 for i_counter, batch in enumerate(test_loader):
 
-    print(i_counter + 1, int(10581/len(batch['clip'])), 'batches done!')
+    print(args.model_name, i_counter + 1, int(10581/args.batch_size), 'batches done!')
     output = model( batch )
 
     for i_s, id in enumerate( batch['id']):
@@ -159,8 +146,7 @@ for i_counter, batch in enumerate(test_loader):
         min_d = inf
 
         for gt_coords0 in batch['locs'][i_s]:
-            if gt_coords0[0].item() == inf:
-                continue
+            if gt_coords0[0].item() == inf:  continue
             gt_coords = ( gt_coords0[0].item(), gt_coords0[1].item() )
                     
             d = gcd( gt_coords,  pred_coords )
@@ -178,6 +164,5 @@ print('#samples', len(ls_gcds),'MEAN:', mean_gcd, ' | MEDIAN:', median_gcd)
     
 results_path = f'{args.results_path}/eval_{args.model_name}_{checkpoint_name}.json'
     
-with open(results_path, 'w') as outfile:
-    json.dump({'#samples': len(ls_gcds), 'Mean': mean_gcd, 'Median': median_gcd}, outfile)
+with open(results_path, 'w') as outfile:   json.dump({'#samples': len(ls_gcds), 'Mean': mean_gcd, 'Median': median_gcd}, outfile)
 
