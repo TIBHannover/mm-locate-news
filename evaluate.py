@@ -50,31 +50,27 @@ def main():
     model = {'v_clip':geo_base_v(), 'v_loc':geo_base_v(), 'v_scene':geo_base_v(), 'v_obj':geo_base_v(), 'v_clip_loc':geo_base_v(), 'v_clip_scene':geo_base_v(), 'v_loc_scene':geo_base_v(), 'v_loc_scene_obj':geo_base_v() , 'v_clip_loc_scene':geo_base_v(),'v_loc_obj':geo_base_v(), 'v_scene_obj':geo_base_v(),
              't_body':geo_base_t(), 't_entity':geo_base_t() ,'t_2bert':geo_base_t(),
              'm_body_clip':geo_base_vt(), 'm_entity_clip':geo_base_vt(), 'm_2bert_clip':geo_base_vt(),'m_2bert_clip_scene':geo_base_vt(), 'm_2bert_clip_loc':geo_base_vt() ,  'm_2bert_loc_scene':geo_base_vt(), 'm_2bert_clip_loc_scene':geo_base_vt(),
-            #  'reg_v_clip':geo_base_v(), 'reg_v_scene':geo_base_v(), 'reg_v_clip_loc_scene':geo_base_v(),
-            #  'reg_t': geo_base_t(),
-            #  'reg_mm_clip':geo_base_vt(), 'reg_mm_loc_scene':geo_base_vt(), 'reg_mm_body_clip':geo_base_vt(), 'reg_mm_entity_clip':geo_base_vt(), 'reg_mm_clip_loc_scene':geo_base_vt()
-    }[args.model_name]
+           }[args.model_name]
 
     model.to(device)
 
     model_path = f'{checkpoint_path}/{args.test_check_point}'
     logger.info(f"=> loading checkpoint '{model_path}'")
-    if device.type == 'cpu':
-        checkpoint = torch.load(model_path, encoding='latin1', map_location='cpu')
-    else:
-        checkpoint = torch.load(model_path, encoding='latin1')
+
+    checkpoint = torch.load(model_path, encoding='latin1', map_location=device)
 
     args.start_epoch = checkpoint['epoch']
     model.load_state_dict(checkpoint['state_dict'])
     logger.info(f"=> loaded checkpoint '{model_path}' (epoch {checkpoint['epoch']})")
     test_vers = {'T1':{}, 'T2':{}, 'T3':{} }
 
-    cls2coord = open_json(f'{args.data_path}/mm-locate-news/cls_to_coord.json')
+    cls2coord = open_json(f'{ROOT_PATH}/{args.data_path}/mm-locate-news/cls_to_coord.json')
     
+    # save the evaluation results per test version
     for ver in [1,2,3]:
         logger.info(f'Test version {ver} |  Model {args.model_name}')
 
-        data_loader_test = Data_Loader(data_path=f'{args.data_path}/{args.data_to_use}', partition=f'test{ver}')  
+        data_loader_test = Data_Loader(data_path=f'{ROOT_PATH}/{args.data_path}/{args.data_to_use}', partition=f'test{ver}')  
         
         test_loader = torch.utils.data.DataLoader( data_loader_test,  batch_size=args.batch_size,  shuffle=False, num_workers=args.workers, pin_memory=False)
 
@@ -85,9 +81,9 @@ def main():
         logger.info(test_vers[f'T{ver}'] )
     
     logger.info(f'{test_vers["T1"][0]} & {test_vers["T1"][1]}  & {test_vers["T1"][2]}  & {test_vers["T1"][3]} &' +
-                    f'{test_vers["T2"][0]} & {test_vers["T2"][1]}  & {test_vers["T2"][2]}  & {test_vers["T2"][3]} &' +
-                    f'{test_vers["T3"][0]} & {test_vers["T3"][1]}  & {test_vers["T3"][2]}  & {test_vers["T3"][3]} '                 
-                    )
+                f'{test_vers["T2"][0]} & {test_vers["T2"][1]}  & {test_vers["T2"][2]}  & {test_vers["T2"][3]} &' +
+                f'{test_vers["T3"][0]} & {test_vers["T3"][1]}  & {test_vers["T3"][2]}  & {test_vers["T3"][3]} '                 
+                )
 
     save_file(f'{path_eval}/{args.test_check_point}.json', test_vers)
 
