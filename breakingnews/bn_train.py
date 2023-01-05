@@ -1,20 +1,21 @@
 
 from pathlib import Path
 import os
-ROOT_PATH = Path(os.path.dirname(__file__))
 import sys
-sys.path.insert(1, f'{ROOT_PATH.parent}/' )
+ROOT_PATH = Path(os.path.dirname(__file__))
+sys.path.insert(1, f'{ROOT_PATH}/..' )
+from utils import *
 from bn_data_loader import Data_Loader_BN
 from bn_args import get_parser
 import time
 import logging
-from utils import *
 from models.m_t import Geo_base as geo_base_t
 from models.m_v import Geo_base as geo_base_v
 from models.m_vt import Geo_base as geo_base_vt
 import numpy as np
 import random
 from torch.utils.tensorboard import SummaryWriter
+
 
 # read parser
 parser = get_parser()
@@ -79,29 +80,28 @@ def main():
 
     
     # prepare training loader
-    data_loader_train = Data_Loader_BN(data_path=f'{args.data_path}/{args.data_to_use}', partition='train')
+    data_loader_train = Data_Loader_BN(data_path=f'{ROOT_PATH}/../{args.data_path}/{args.data_to_use}', partition='train')
     train_loader = torch.utils.data.DataLoader( data_loader_train,  batch_size=args.batch_size, shuffle=True,num_workers=args.workers, pin_memory=False)
     logger.info('Training loader prepared.')
 
     # prepare validation loader
-    data_loader_val = Data_Loader_BN(data_path=f'{args.data_path}/{args.data_to_use}', partition='val')  
+    data_loader_val = Data_Loader_BN(data_path=f'{ROOT_PATH}/../{args.data_path}/{args.data_to_use}', partition='val')  
     val_loader = torch.utils.data.DataLoader( data_loader_val,  batch_size=args.batch_size,  shuffle=False, num_workers=args.workers, pin_memory=False)
     logger.info('Validation loader prepared.')
 
     # train 
     for epoch in range(args.start_epoch, args.epochs):
-        train_result, batch_time = train(train_loader, model, criterion, optimizer, epoch)
+        train_result = train(train_loader, model, criterion, optimizer, epoch)
 
         val_result = validate(val_loader, model, criterion)
         
         # show tensorboard
-        if args.tensorboard == True:
-            writer.add_scalars(f"{args.model_name}/ {args.data_to_use} / Loss ",{ 'TRAIN': train_result['loss'].data,
-                                                                                    'VAL': val_result['loss'].data}, epoch)        
+        if args.tensorboard == True:   writer.add_scalars(f"{args.model_name}/ {args.data_to_use} / Loss ",{ 'TRAIN': train_result['loss'].data,  'VAL': val_result['loss'].data}, epoch)        
+        
         # save checkpoints
         save_checkpoint({
                     'data': args.data_path.split('/')[-1],
-                    'epoch': f'epoch_{epoch + 1}_tim.{batch_time.sum:0.2f}_loss_{np.round(val_result["loss"].item(), 3)}',
+                    'epoch': f'epoch_{epoch + 1}',
                     'state_dict': model.state_dict(),
                     'optimizer': optimizer.state_dict()},
                     path=f'{checkpoint_path}')
@@ -141,7 +141,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     
     results = {  'loss': losses.avg }
 
-    return results, batch_time
+    return results
     
 
 def validate(val_loader, model, criterion):
@@ -164,6 +164,5 @@ def validate(val_loader, model, criterion):
 
 
 if __name__ == '__main__':
-    if args.tensorboard == True:
-        writer = SummaryWriter()
+    if args.tensorboard == True: writer = SummaryWriter()
     main()
