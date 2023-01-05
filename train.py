@@ -78,27 +78,20 @@ def main():
     logger.info(f'The model has {sum(p.numel() for p in model.parameters() if p.requires_grad):,} trainable parameters')
 
     # prepare training loader
-    data_loader_train = Data_Loader(data_path=f'{args.data_path}/{args.data_to_use}', partition='train')
+    data_loader_train = Data_Loader(data_path=f'{ROOT_PATH}/{args.data_path}/{args.data_to_use}', partition='train')
     train_loader = torch.utils.data.DataLoader( data_loader_train,  batch_size=args.batch_size, shuffle=True,num_workers=args.workers, pin_memory=False)
     logger.info('Training loader prepared.')
 
     # prepare validation loader
-    data_loader_val = Data_Loader(data_path=f'{args.data_path}/{args.data_to_use}', partition='val')
+    data_loader_val = Data_Loader(data_path=f'{ROOT_PATH}/{args.data_path}/{args.data_to_use}', partition='val')
     val_loader = torch.utils.data.DataLoader( data_loader_val,  batch_size=args.batch_size,  shuffle=False, num_workers=args.workers, pin_memory=False)
     logger.info('Validation loader prepared.')
 
     cls2coord = open_json(f'{args.data_path}/mm-locate-news/cls_to_coord.json')
 
     # train
-    best_gcd_validation = {'city': -1, 'region': -1, 'country': -1, 'continent': -1 , 'all':-1,
-                            'city_region': -1, 'city_region_country': -1}
-    Path(f'{checkpoint_path}/city').mkdir(parents=True, exist_ok=True)
-    Path(f'{checkpoint_path}/city_region').mkdir(parents=True, exist_ok=True)
-    Path(f'{checkpoint_path}/city_region_country').mkdir(parents=True, exist_ok=True)
-    Path(f'{checkpoint_path}/region').mkdir(parents=True, exist_ok=True)
-    Path(f'{checkpoint_path}/country').mkdir(parents=True, exist_ok=True)
-    Path(f'{checkpoint_path}/continent').mkdir(parents=True, exist_ok=True)
-    Path(f'{checkpoint_path}/all').mkdir(parents=True, exist_ok=True)
+    best_gcd_validation = -1
+    Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
 
     for epoch in range(args.start_epoch, args.epochs):
 
@@ -106,30 +99,19 @@ def main():
 
         val_loss , gcd_validation = validate(val_loader, model, criterion, cls2coord)
 
-        logger.info(f'Validation loss: {val_loss} | Mean validation gcd: { gcd_validation["all"] } ' )
+        logger.info(f'Validation loss: {val_loss} | Mean validation gcd: { gcd_validation } ' )
 
         # show tensorboard
-        if args.tensorboard == True:
-            writer.add_scalars(f"{args.model_name}/ {args.data_to_use} / Loss ",{ 'TRAIN': train_result['loss'].data,
-                                                                                    'VAL': val_loss.data}, epoch  )
+        if args.tensorboard == True: writer.add_scalars(f"{args.model_name}/ {args.data_to_use} / Loss ",{ 'TRAIN': train_result['loss'].data,  'VAL': val_loss.data}, epoch  )
 
+        if best_gcd_validation  <= gcd_validation:
+            best_gcd_validation  = gcd_validation
+            save_name = f'epoch_{epoch + 1}_gcdVAL_{gcd_validation}'
 
-        save_checkpoint({'data': args.data_path.split('/')[-1],
-                        'epoch': f'{epoch + 1}',
-                        'state_dict': model.state_dict(),
-                        'optimizer': optimizer.state_dict()}, path=f'{checkpoint_path}')  
-
-        for key_granularity in gcd_validation:
-
-            if best_gcd_validation[key_granularity] <= gcd_validation[key_granularity]:
-                gcd_val = gcd_validation[key_granularity]
-                best_gcd_validation[key_granularity]  = gcd_val
-                save_name = f'epoch_{epoch + 1}_gcdVAL_{key_granularity}_{gcd_val}_loss_{np.round(val_loss.item(), 3)}'
-
-                save_checkpoint({'data': args.data_path.split('/')[-1],
-                                'epoch': save_name,
-                                'state_dict': model.state_dict(),
-                                'optimizer': optimizer.state_dict()}, path=f'{checkpoint_path}/{key_granularity}')     
+            save_checkpoint({'data': args.data_path.split('/')[-1],
+                            'epoch': save_name,
+                            'state_dict': model.state_dict(),
+                            'optimizer': optimizer.state_dict()}, path=f'{checkpoint_path}')     
    
 
 def train(train_loader, model, criterion, optimizer, epoch):
@@ -185,16 +167,13 @@ def validate(val_loader, model, criterion, cls2coord):
 
     val_loss =  losses.avg 
 
-    gcd_validation =  classify_gcd(output_top1, cls2coord)
+    gcd_validation0 =  classify_gcd(output_top1, cls2coord)
 
-    gcd_validation['all'] = np.mean( [gcd_validation['city'], gcd_validation['region'], gcd_validation['country'], gcd_validation['continent']] )
-    gcd_validation['city_region'] = np.mean( [gcd_validation['city'], gcd_validation['region'] ] )
-    gcd_validation['city_region_country'] = np.mean( [gcd_validation['city'], gcd_validation['region'], gcd_validation['country'] ] )
+    gcd_validation = np.mean( [gcd_validation0['city'], gcd_validation0['region'] ] )
 
     return val_loss, gcd_validation
 
 
 if __name__ == '__main__':
-    if args.tensorboard == True:
-        writer = SummaryWriter()
+    if args.tensorboard == True: writer = SummaryWriter()
     main()
