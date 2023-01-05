@@ -3,7 +3,7 @@ import argparse
 def get_parser():
 
     parser = argparse.ArgumentParser(description='BreakingNews')
-    parser.add_argument('--data_path', default='../dataset')
+    parser.add_argument('--data_path', default='dataset')
     parser.add_argument('--data_to_use', default='breaking-news', type=str)
     parser.add_argument('--results_path', default = 'breakingnews/results')
     parser.add_argument('--emb_dim', default = 1024, type=int)
@@ -27,5 +27,5 @@ def get_parser():
     parser.add_argument('--seed', default=1234, type=int)
     
     parser.add_argument('--model_name', default='reg_v_clip', type=str, help='reg_v_clip, reg_t_2bert, reg_mm_clip_loc_scene')
-    parser.add_argument('--check_point',  default =''  )
+    parser.add_argument('--check_point',  default ='epoch_20.pth.tar'  )
     return parser
