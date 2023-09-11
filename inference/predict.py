@@ -1,5 +1,5 @@
 import sys
-sys.path.insert( 0, '/data/1/mmm_test/mm-locate-news' )
+sys.path.insert( 0, '../mm-locate-news' )
 from inference.embed_image import *
 from inference.embed_text import *
 from args import get_parser
@@ -10,8 +10,6 @@ from utils import *
 from pathlib import Path
 import os
 
-loc_info = open_json('/data/1/mmm_test/mm-locate-news/dataset/mm-locate-news/loc_info.json')
-
 
 
 ROOT_PATH = Path(os.path.dirname(__file__)).parent
@@ -19,16 +17,23 @@ parser = get_parser()
 args = parser.parse_args()
 
 
-image_path = '/data/1/mmm_test/mm-locate-news/inference/Q7890669_5.jpg'
-text_input = 'North America'
+image_path = '../mm-locate-news/inference/test_image.jpg'
+text_input = '2010 United States House of Representatives elections in Washington '
 
+data_in = {}
 
-clip_image = get_clip_image_feature(image_path)
-loc = get_location_feature(image_path)
-obj = get_obj_feature(image_path)
-scene = get_scene_feature(image_path)
-body = get_bert_body_feature(text_input)
-entity = get_bert_entity_feature(text_input) #get_bert_entity_feature(text_input)
+if 'clip' in args.model_name:
+    data_in['clip'] = get_clip_image_feature(image_path)
+if 'loc' in args.model_name:
+    data_in['loc'] = get_location_feature(image_path)
+if 'obj' in args.model_name:
+    data_in['obj'] = get_obj_feature(image_path)
+if 'scene' in args.model_name:
+    data_in['scene'] = get_scene_feature(image_path)
+if 'body' in args.model_name:
+    data_in['body'] = get_bert_body_feature(text_input)
+if 'entity' in args.model_name:
+    data_in['entity'] = get_bert_entity_feature(text_input) 
 
 
 model = {'v_clip':geo_base_v(), 'v_loc':geo_base_v(), 'v_scene':geo_base_v(), 'v_obj':geo_base_v(), 'v_clip_loc':geo_base_v(), 'v_clip_scene':geo_base_v(), 'v_loc_scene':geo_base_v(), 'v_loc_scene_obj':geo_base_v() , 'v_clip_loc_scene':geo_base_v(),'v_loc_obj':geo_base_v(), 'v_scene_obj':geo_base_v(),
@@ -47,23 +52,18 @@ checkpoint = torch.load(model_path, encoding='latin1', map_location=device)
 model.load_state_dict(checkpoint['state_dict'])
 model.eval()
 
+loc_info = open_json(f'{ROOT_PATH}/{args.data_path}/mm-locate-news/loc_info.json')
 cls2coord = open_json(f'{ROOT_PATH}/{args.data_path}/mm-locate-news/cls_to_coord.json')
 cls2wikidata = open_json(f'{ROOT_PATH}/{args.data_path}/mm-locate-news/location_to_class.json')
 
-data_in = {
-            'loc': loc,
-            'obj': obj,
-            'scene':torch.from_numpy(scene).unsqueeze(0),
-            'body': torch.from_numpy(body).unsqueeze(0),
-            'entity': torch.from_numpy(entity).unsqueeze(0),
-            'clip': torch.from_numpy(clip_image).unsqueeze(0),
-        }
 
 [output_classify] = model(data_in)
 
 
-vals = torch.topk(output_classify, k=5)[1]
-topk_preds = [v.item() for v in vals]
+p_cls = torch.topk(output_classify, k=389)[1]
+p_vals = torch.topk(output_classify, k=389)[0]
+vals = [ v.item() for v in p_vals ] 
+topk_preds = [v.item() for v in p_cls]
 topk_preds_wikidata = [list(cls2wikidata.keys())[topk_pred] for topk_pred in topk_preds]
 topk_preds_coords = [cls2coord[str(topk_pred)] for topk_pred in topk_preds]
 
