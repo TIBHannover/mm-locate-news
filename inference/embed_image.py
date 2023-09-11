@@ -13,14 +13,16 @@ device = 'cpu'
 def get_scene_feature(img_path):
     embedder = SceneEmbedding()
     im_pil = Image.open(img_path).convert('RGB')
-
-    return embedder.embed(im_pil)
+    image_emb = embedder.embed(im_pil)
+    image_emb = image_emb.squeeze()
+    image_emb = image_emb.unsqueeze(0) #.detach().cpu().numpy()
+    return image_emb.to(device)
 
 def get_location_feature(img_path):
-
     embedder = LocationEmbedding()
     im_pil = Image.open(img_path).convert('RGB')
-    return embedder.embed(im_pil)
+    image_emb = embedder.embed(im_pil).unsqueeze(0) #.detach().cpu().numpy()
+    return image_emb.to(device)
 
 def get_obj_feature(img_path):
     preprocess = transforms.Compose([
@@ -34,18 +36,18 @@ def get_obj_feature(img_path):
     image_tensor = image_tensor.unsqueeze(0)
     with torch.no_grad():
         resnet152.eval()  # Set the model to evaluation mode
-        image_emb = resnet152(image_tensor)
+        image_emb = resnet152(image_tensor).squeeze()
     
-    return image_emb.squeeze()
+    image_emb = image_emb.unsqueeze(0) #.detach().cpu().numpy()
+    return image_emb.to(device)
 
 def get_clip_image_feature(img_path):
     image = Image.open(img_path)
     model, preprocess = clip.load("ViT-B/32", device=device)
-    
     image = preprocess(image).unsqueeze(0).to(device)
     outputs = model.encode_image(image)
-    image_emb = outputs.squeeze().detach().cpu().numpy()
-    return image_emb
+    image_emb = outputs.squeeze()      #.detach().cpu().numpy()
+    return image_emb.unsqueeze(0)
 
 # image_path = '/data/1/mmm_test/mm-locate-news/inference/Q7890669_5.jpg'
 # print( get_obj_feature(image_path).shape )
