@@ -1,4 +1,4 @@
-#### MM-Locate-News: Multimodal Focus Location Estimation in News
+### MM-Locate-News: Multimodal Focus Location Estimation in News
 This is the official GitHub page for the paper ([link here](https://link.springer.com/chapter/10.1007/978-3-031-27077-2_16)):
 
 
