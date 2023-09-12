@@ -3,7 +3,7 @@ import clip
 import sys
 sys.path.insert(1, '../mm-locate-news')
 from inference.image_scene_features import SceneEmbedding
-from inference.image_location_features import LocationEmbedding
+# from inference.image_location_features import LocationEmbedding
 import torchvision.models as models
 import torch
 import torch.nn as nn
@@ -48,6 +48,3 @@ def get_clip_image_feature(img_path):
     outputs = model.encode_image(image)
     image_emb = outputs.squeeze()      #.detach().cpu().numpy()
     return image_emb.unsqueeze(0)
-
-# image_path = '/data/1/mmm_test/mm-locate-news/inference/Q7890669_5.jpg'
-# print( get_obj_feature(image_path).shape )
