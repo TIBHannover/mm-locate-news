@@ -35,8 +35,8 @@ def get_parser():
     parser.add_argument('--freeze_text', default=False, type=bool)
     parser.add_argument('--freeze_image', default=False, type=bool)
     parser.add_argument('--tensorboard', default=False, type=bool)
-    parser.add_argument('--test_image_path', default='/data/1/mmm_test/mm-locate-news/inference/sample_data/test_image.jpg', type=str)
-    parser.add_argument('--text_input_path', default='/data/1/mmm_test/mm-locate-news/inference/sample_data/test.txt', type=str)
+    parser.add_argument('--test_image_path', default='sample_data/test_image.jpg', type=str)
+    parser.add_argument('--text_input_path', default='sample_data/test.txt', type=str)
 
     return parser
 
