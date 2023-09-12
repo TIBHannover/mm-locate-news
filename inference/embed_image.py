@@ -8,7 +8,7 @@ import torchvision.models as models
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-device = 'cpu'
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def get_scene_feature(img_path):
     embedder = SceneEmbedding()
