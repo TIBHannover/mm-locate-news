@@ -10,11 +10,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 ## Download Data
-Download the data from here and put in the root directory.
+Download the data from [here](https://tib.eu/cloud/s/cLwMtGoD9QJrRss) and put in the root directory.
 
 ## Download Checkpoints
-For mm-locate-news dataset download the trained models from [here](https://tib.eu/cloud/s/j6zmqBtgHm5rs7e) and extract in ``` experiments/snapshots```.
-For BreakingNews dataset download the trained models from [here](https://tib.eu/cloud/s/DFPji6E2SKZ3nBf) and extract in ``` breakingnews/experiments/snapshots```.
+For mm-locate-news dataset download the trained models from [here](https://tib.eu/cloud/s/t3gpgTQg5ZwnabC) and extract in ``` experiments/snapshots```.
+For BreakingNews dataset download the trained models from [here](https://tib.eu/cloud/s/7R8GJgm7xP5oTKH) and extract in ``` breakingnews/experiments/snapshots```.
 
 
 ## Evaluation
@@ -55,5 +55,11 @@ To train the models based on BreakingNews dataset:
 python breakingnews/bn_train.py \
 --model_name <MODELNAME> \
 --resume <CHECKPOINT> 
+```
+
+## Inference
+To get the output predictions for an input image and text pair:
+```bash
+python inference/predict.py --test_image_path <IMAGEPATH> --text_input_path <TEXTPATH>
 ```
 
