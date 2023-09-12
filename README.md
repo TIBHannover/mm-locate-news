@@ -64,6 +64,7 @@ python breakingnews/bn_train.py \
 ## Inference
 To get the output predictions for an input image and text pair download [this](https://tib.eu/cloud/s/DSBigrGJnAxnymB) and put it in ```inference``` folder.
 ```bash
+python -m spacy download en_core_web_sm
 python inference/predict.py --test_image_path <IMAGEPATH> --text_input_path <TEXTPATH>
 ```
 ## Citation
