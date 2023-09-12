@@ -6,7 +6,7 @@ def get_parser():
 
     parser.add_argument('--data_to_use', default='mm-locate-news', type=str)
     parser.add_argument('--data_path', default='dataset')
-    parser.add_argument('--model_name', default='m_2bert_clip_loc_scene', type=str, help=' \
+    parser.add_argument('--model_name', default='m_2bert_clip', type=str, help=' \
                         [v_clip, v_loc_obj, v_scene_obj, v_loc_scene, v_loc_scene_obj, v_clip_loc, v_clip_scene, v_loc_scene_obj, v_clip_loc_scene    , v_loc, v_scene, v_obj ], \
                         [t_body, t_entity ,t_2bert], \
                         [m_2bert_clip, m_2bert_clip_loc, m_2bert_clip_scene, m_2bert_loc_scene, m_2bert_clip_loc_scene ] ')
