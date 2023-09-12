@@ -58,7 +58,7 @@ python breakingnews/bn_train.py \
 ```
 
 ## Inference
-To get the output predictions for an input image and text pair:
+To get the output predictions for an input image and text pair download [this](https://tib.eu/cloud/s/DSBigrGJnAxnymB) and put it in ```inference/models```.
 ```bash
 python inference/predict.py --test_image_path <IMAGEPATH> --text_input_path <TEXTPATH>
 ```
