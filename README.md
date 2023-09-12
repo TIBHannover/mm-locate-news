@@ -1,6 +1,9 @@
 # MM-Locate-News: Multimodal Focus Location Estimation in News
 This is the official GitHub page for the paper ([link here](https://link.springer.com/chapter/10.1007/978-3-031-27077-2_16)):
 
+Golsa Tahmasebzadeh, Eric Müller-Budack, Sherzod Hakimov, Ralph Ewerth: "MM-Locate-News: Multimodal Focus Location Estimation in News". In: 29th International Conference on Multimedia Modeling (MMM), Bergen, Springer, 2023, 204–216.
+
+
 
 ## Installation
 
