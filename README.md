@@ -64,4 +64,22 @@ To get the output predictions for an input image and text pair download [this](h
 ```bash
 python inference/predict.py --test_image_path <IMAGEPATH> --text_input_path <TEXTPATH>
 ```
-
+## Citation
+```
+@inproceedings{DBLP:conf/mmm/TahmasebzadehMHE23,
+  author       = {Golsa Tahmasebzadeh and
+                  Eric M{\"{u}}ller{-}Budack and
+                  Sherzod Hakimov and
+                  Ralph Ewerth},
+  title        = {MM-Locate-News: Multimodal Focus Location Estimation in News},
+  booktitle    = {MultiMedia Modeling - 29th International Conference, {MMM} 2023, Bergen,
+                  Norway, January 9-12, 2023, Proceedings, Part {I}},
+  series       = {Lecture Notes in Computer Science},
+  volume       = {13833},
+  pages        = {204--216},
+  publisher    = {Springer},
+  year         = {2023},
+  url          = {https://doi.org/10.1007/978-3-031-27077-2\_16},
+  doi          = {10.1007/978-3-031-27077-2\_16}
+}
+```
