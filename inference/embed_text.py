@@ -1,6 +1,5 @@
 import numpy as np
 from transformers import BertTokenizer, BertModel
-import flair
 from flair.embeddings import BertEmbeddings, DocumentPoolEmbeddings
 from flair.data import Sentence
 import sys
@@ -21,7 +20,7 @@ class DocEmbeddings(object):
         self.document_embeddings = self.load_embedding_model()
 
     def load_embedding_model(self):
-        print('Loading BERT Embeddings...')
+        # print('Loading BERT Embeddings...')
         bert_embeddings = BertEmbeddings('bert-base-uncased') # bert-base-multilingual-cased
         return DocumentPoolEmbeddings([bert_embeddings])
 
@@ -31,9 +30,9 @@ class DocEmbeddings(object):
         return x.embedding
 
 def bert_embed_body(text):
-
+    # print('getting body features ...')
     doc_embeddings = DocEmbeddings()
-    output = doc_embeddings.embed(text).detach().cpu().numpy()
+    output = doc_embeddings.embed(text).unsqueeze(0)
 
     return output
 
@@ -81,15 +80,16 @@ def get_named_entities(input_text):
 
 
 def get_bert_entity_feature(text_input):
-    print('getting named entities ...')
+    # print('getting named entities ...')
     nes = get_named_entities(text_input)
     doc_embeddings = DocEmbeddings()
     output = []
-    print('getting features ... ')
+
     for ne_ in nes:
         ne = ne_['uri'].split('/')[-1].replace('_', ' ')
-        output.append ( doc_embeddings.embed(ne).detach().cpu().numpy() )
-    
-    return np.average(output, 0)
+        output.append ( doc_embeddings.embed(ne) )
+    output = torch.stack(output, 0)
+    output = torch.mean(output, 0)
+    return output.unsqueeze(0)
 
 
