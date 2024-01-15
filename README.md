@@ -14,11 +14,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 ## Download Data
-Download the data from [here](https://tib.eu/cloud/s/cLwMtGoD9QJrRss) and put in the root directory.
+Download the data from [here](https://tib.eu/cloud/s/GsxeFzwjtGGrn5Y) and put in the root directory.
 
 ## Download Checkpoints
-For mm-locate-news dataset download the trained models from [here](https://tib.eu/cloud/s/srxyq66SsHxngzH) and extract in ``` experiments/snapshots```.
-For BreakingNews dataset download the trained models from [here](https://tib.eu/cloud/s/WYC3NrWsrLYZcy3) and extract in ``` breakingnews/experiments/snapshots```.
+For mm-locate-news dataset download the trained models from [here](https://tib.eu/cloud/s/LcQHa6tKYEk4sBL) and extract in ``` experiments/snapshots```.
+For BreakingNews dataset download the trained models from [here](https://tib.eu/cloud/s/Xes7g7G4MWQeMz9) and extract in ``` breakingnews/experiments/snapshots```.
 
 
 ## Evaluation
