@@ -17,8 +17,8 @@ pip install -r requirements.txt
 Download the data from [here](https://tib.eu/cloud/s/GsxeFzwjtGGrn5Y) and put in the root directory.
 
 ## Download Checkpoints
-For mm-locate-news dataset download the trained models from [here](https://tib.eu/cloud/s/LcQHa6tKYEk4sBL) and extract in ``` experiments/snapshots```.
-For BreakingNews dataset download the trained models from [here](https://tib.eu/cloud/s/Xes7g7G4MWQeMz9) and extract in ``` breakingnews/experiments/snapshots```.
+For mm-locate-news dataset download the trained models from [here](https://tib.eu/cloud/s/PwDt6PgdwW9LHXH) and extract in ``` experiments/snapshots```.
+For BreakingNews dataset download the trained models from [here](https://tib.eu/cloud/s/fymNNnyPsioGHAt) and extract in ``` breakingnews/experiments/snapshots```.
 
 
 ## Evaluation
